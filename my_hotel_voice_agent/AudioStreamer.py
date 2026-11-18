@@ -1,6 +1,9 @@
 import pyaudio
 import asyncio
+import  logging
 
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format="%(level)s %(name)s %(message)s")
 
 
 class AudioStreamer:
@@ -17,25 +20,15 @@ class AudioStreamer:
         # Initialize PyAudio
         self.audio_engine = pyaudio.PyAudio()
     
-    def input_callback(self, audio_chunk , frame_count, time_info, status):
+    def listening_handler(self, audio_chunk , frame_count, time_info, status):
         """Callback function that schedules audio processing in the asyncio event loop"""
         
         if self.is_listening and audio_chunk :
             # Schedule the task in the event loop
-            asyncio.run_coroutine_threadsafe(
-                self.process_input_audio_chunk(audio_chunk ),
-                self.event_loop
-            )
-        # return (None, pyaudio.paComplete) paContinue is the heartbeat signal that keeps the microphone streaming chunk after chunk.
+            self.event_loop.call_soon_threadsafe(
+                self.mic_audio_input_queue.put_nowait, 
+                audio_chunk
+                )
+        # or (None, pyaudio.paComplete) to stop; paContinue is the heartbeat signal that keeps the microphone streaming chunk after chunk.
         return (None, pyaudio.paContinue) 
 
-    
-    async def process_input_audio_chunk(self, audio_chunk):
-        """Process a single audio chunk directly"""
-
-        try:
-            self.mic_audio_input_queue.put_nowait(audio_chunk)
-
-        except Exception as e:
-            if self.is_listening:
-                print(f"Input queue failed: {e}") 
