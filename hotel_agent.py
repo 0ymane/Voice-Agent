@@ -1160,7 +1160,7 @@ class AudioStreamer:
         """Start streaming audio."""
         if self.is_streaming:
             return
-
+ 
         print("Starting audio streaming. Speak into your microphone...")
         print("Press Enter to stop streaming...")
 

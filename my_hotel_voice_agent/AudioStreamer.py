@@ -32,3 +32,30 @@ class AudioStreamer:
         # or (None, pyaudio.paComplete) to stop; paContinue is the heartbeat signal that keeps the microphone streaming chunk after chunk.
         return (None, pyaudio.paContinue) 
 
+
+    async def receive_audio_response(self):
+        """ Get audio data from the queue """
+
+        try:
+            audio_response = await asyncio.wait_for(
+                    self.speaker_audio_output_queue.get(), timeout=0.1
+                )
+            
+        except asyncio.TimeoutError:
+            logger.debug(f"No speech audio received from queue, doing a timeout")
+            return b""
+        
+        logger.debug(f"received {len(audio_response)} bytes")
+        return audio_response 
+
+    def prepare_speaking_audio():
+        return 0
+    
+    def check_barge_in():
+        return 0
+    
+    def speak_audio_chunk():
+        return 0
+    
+    def shut_up():
+        return 0
